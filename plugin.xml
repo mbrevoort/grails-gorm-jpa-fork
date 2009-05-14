@@ -1,0 +1,16 @@
+<plugin name='gorm-jpa' version='0.1' grailsVersion='1.1 &gt; *'>
+  <author>Graeme Rocher</author>
+  <title>GORM-JPA Plugin</title>
+  <description>\
+A plugin that emulates the behavior of the GORM-Hibernate plugin against a standard JPA 1.0 backend
+</description>
+  <documentation>http://grails.org/plugin/gorm-jpa</documentation>
+  <resources>
+    <resource>BuildConfig</resource>
+    <resource>DataSource</resource>
+    <resource>spring.resources</resource>
+    <resource>UrlMappings</resource>
+    <resource>org.acme.Person</resource>
+  </resources>
+  <dependencies />
+</plugin>
