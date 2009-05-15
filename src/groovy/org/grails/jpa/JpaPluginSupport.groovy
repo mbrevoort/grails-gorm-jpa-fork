@@ -22,6 +22,9 @@ import org.grails.spring.scope.PrototypeScopeMetadataResolver
 import javax.persistence.EntityManagerFactory
 import org.grails.jpa.exceptions.JpaPluginException
 import org.springframework.orm.jpa.JpaTemplate
+import org.springframework.orm.jpa.JpaCallback
+import javax.persistence.EntityManager
+import grails.util.GrailsNameUtils
 
 /**
  * @author Graeme Rocher
@@ -48,13 +51,62 @@ public class JpaPluginSupport {
 
               for(entry in entityBeans) {
                   Class entityClass = entry.value.class
+                  def logicalName = GrailsNameUtils.getLogicalPropertyName(entityClass.name,'') 
 
                   entityClass.metaClass {
                       'static' {
-                          get { Serializable id -> jpaTemplate.find(entityClass, id) }  
+                          // Foo.get(1)
+                          get { Serializable id -> jpaTemplate.find(entityClass, id) }
+                          // Foo.list(max:10)
+                          list { Map args = [:] ->
+                              jpaTemplate.executeFind( { EntityManager em ->
+                                def orderBy = ''
+                                def order = ''
+                                if(args?.sort) {
+                                    if(args?.order) {
+                                        order = args.order == 'desc' ? ' desc' : ' asc'
+                                    }
+                                    def sort = args.sort
+                                    if(sort instanceof List) {
+                                        orderBy = " order by ${sort.join(", ${logicalName}.")}${order}"
+                                    }
+                                    else {
+                                        orderBy = " order by ${logicalName}.${sort}${order}"
+                                    }
+                                }
+
+                                  def q = em.createQuery("from ${entityClass.name} as ${logicalName} ${orderBy}")
+                                  if(args?.max) {
+                                      q.setMaxResults(args.max.toInteger())
+                                  }
+                                  if(args?.offset) {
+                                      q.setFirstResult(args.offset.toInteger())
+                                  }
+                                  q.resultList
+                              } as JpaCallback)
+                          }
+                          // Foo.withEntityManager { em -> }
+                          withEntityManager { Closure callable ->
+                              callable.call( jpaTemplate.getEntityManager() ) 
+                          }
                       }
-                      save {-> jpaTemplate.persist delegate }
-                      delete {-> jpaTemplate.remove delegate }
+                      // foo.save(flush:true)
+                      save { Map args = [:] ->
+                        if(delegate.validate()) {                          
+                          jpaTemplate.persist delegate
+                          if(args?.flush) {
+                             jpaTemplate.flush()
+                          }
+                        }
+                      }
+                      // foo.delete(flush:true)
+                      delete {Map args = [:]->
+                        jpaTemplate.remove delegate
+                        if(args?.flush) {
+                           jpaTemplate.flush()
+                        }
+                      }
+                      // foo.refresh()
                       refresh {-> jpaTemplate.refresh delegate }
                   }
 

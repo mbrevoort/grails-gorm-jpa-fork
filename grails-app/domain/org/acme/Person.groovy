@@ -5,6 +5,7 @@ import javax.persistence.Id
 import javax.annotation.Generated
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
+import javax.persistence.Version
 
 /**
  * @author Graeme Rocher
@@ -21,4 +22,7 @@ public class Person {
     Long id
 
     String name
+
+    @Version
+    Long version
 }
