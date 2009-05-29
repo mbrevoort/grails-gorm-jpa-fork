@@ -25,6 +25,9 @@ import org.springframework.orm.jpa.JpaTemplate
 import org.springframework.orm.jpa.JpaCallback
 import javax.persistence.EntityManager
 import grails.util.GrailsNameUtils
+import org.grails.jpa.domain.JpaGrailsDomainClass
+import org.codehaus.groovy.grails.commons.GrailsDomainClass
+import org.codehaus.groovy.grails.commons.DomainClassArtefactHandler
 
 /**
  * @author Graeme Rocher
@@ -33,6 +36,8 @@ import grails.util.GrailsNameUtils
  * Created: Apr 17, 2009
  */
 public class JpaPluginSupport {
+
+
 
   static doWithSpring = {
           xmlns context:"http://www.springframework.org/schema/context"
@@ -51,6 +56,8 @@ public class JpaPluginSupport {
 
               for(entry in entityBeans) {
                   Class entityClass = entry.value.class
+                  GrailsDomainClass domainClass = new JpaGrailsDomainClass(entityClass)
+                  application.addArtefact(DomainClassArtefactHandler.TYPE,domainClass)
                   def logicalName = GrailsNameUtils.getLogicalPropertyName(entityClass.name,'') 
 
                   entityClass.metaClass {
@@ -75,7 +82,7 @@ public class JpaPluginSupport {
                                     }
                                 }
 
-                                  def q = em.createQuery("from ${entityClass.name} as ${logicalName} ${orderBy}")
+                                  def q = em.createQuery("select ${logicalName} from ${entityClass.name} as ${logicalName} ${orderBy}")
                                   if(args?.max) {
                                       q.setMaxResults(args.max.toInteger())
                                   }
@@ -90,6 +97,10 @@ public class JpaPluginSupport {
                               callable.call( jpaTemplate.getEntityManager() ) 
                           }
                       }
+
+                      getConstraints {->
+                        domainClass.constrainedProperties 
+                      }
                       // foo.save(flush:true)
                       save { Map args = [:] ->
                         if(delegate.validate()) {                          
@@ -97,6 +108,7 @@ public class JpaPluginSupport {
                           if(args?.flush) {
                              jpaTemplate.flush()
                           }
+                          return delegate
                         }
                       }
                       // foo.delete(flush:true)

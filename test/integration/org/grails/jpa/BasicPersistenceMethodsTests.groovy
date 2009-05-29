@@ -11,10 +11,15 @@ import org.acme.Person
 
 public class BasicPersistenceMethodsTests extends GroovyTestCase{
 
+    void testValidation() {
+      def p = new Person(name:"")
+      assertNull "should not have validated",  p.save(flush:true )
+    }
+
     void testSaveAndGet() {
 
           def p = new Person(name:"Fred")
-          p.save()
+          p.save(flush:true )
 
           assertEquals 1, p.id
 

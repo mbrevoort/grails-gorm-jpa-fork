@@ -1,11 +1,6 @@
 package org.acme
 
-import javax.persistence.Entity
-import javax.persistence.Id
-import javax.annotation.Generated
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Version
+import javax.persistence.*
 
 /**
  * @author Graeme Rocher
@@ -15,7 +10,7 @@ import javax.persistence.Version
  */
 
 @Entity
-public class Person {
+class Person {
 
     @Id
     @GeneratedValue (strategy = GenerationType.AUTO)
@@ -23,6 +18,13 @@ public class Person {
 
     String name
 
+    @Transient
+    String leaveMe
+
     @Version
     Long version
+
+    static constraints = {
+        name blank:false
+    }
 }

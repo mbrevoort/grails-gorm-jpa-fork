@@ -23,6 +23,7 @@ public class JpaGrailsDomainClassTests extends GroovyTestCase{
     }
 
     void testIdentifier() {
+
         def personDomain = new JpaGrailsDomainClass(Person)
 
         assertNotNull personDomain.identifier
@@ -33,7 +34,15 @@ public class JpaGrailsDomainClassTests extends GroovyTestCase{
       def personDomain = new JpaGrailsDomainClass(Person)
 
       assertNotNull personDomain.version
-      assertEquals "version", personDomain.identifier.name
+      assertEquals "version", personDomain.version.name
+
+    }
+
+    void testPersistentProperties() {
+      def personDomain = new JpaGrailsDomainClass(Person)
+
+      assertTrue "name property should be persistent",personDomain.getPropertyByName("name").isPersistent()
+      assertFalse "leaveMe property should be transient", personDomain.getPropertyByName("leaveMe").isPersistent()
 
     }
 
