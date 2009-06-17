@@ -25,7 +25,11 @@ import org.springframework.orm.jpa.JpaTemplate
 import org.springframework.orm.jpa.JpaCallback
 import javax.persistence.EntityManager
 import grails.util.GrailsNameUtils
+import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.grails.jpa.domain.JpaDomainClassArtefactHandler
 import org.grails.jpa.domain.JpaGrailsDomainClass
+import org.springframework.beans.SimpleTypeConverter
+import javax.persistence.Query
 import org.codehaus.groovy.grails.commons.GrailsDomainClass
 import org.codehaus.groovy.grails.commons.DomainClassArtefactHandler
 
@@ -54,17 +58,75 @@ public class JpaPluginSupport {
               EntityManagerFactory entityManagerFactory = entityManagerFactoryBean.values().iterator().next()
               JpaTemplate jpaTemplate = new JpaTemplate(entityManagerFactory)
 
+              GrailsApplication app = application
               for(entry in entityBeans) {
-                  Class entityClass = entry.value.class
-                  GrailsDomainClass domainClass = new JpaGrailsDomainClass(entityClass)
-                  application.addArtefact(DomainClassArtefactHandler.TYPE,domainClass)
+                 Class entityClass = entry.value.class
+                 app.addArtefact(JpaDomainClassArtefactHandler.TYPE, new JpaGrailsDomainClass(entityClass))                 
+              }
+
+              for(domainClass in application.domainClasses) {
+                  if(!(domainClass instanceof JpaGrailsDomainClass)) continue;
+
+                  JpaGrailsDomainClass jpaGrailsDomainClass = domainClass
+                  Class entityClass = jpaGrailsDomainClass.clazz
                   def logicalName = GrailsNameUtils.getLogicalPropertyName(entityClass.name,'') 
 
+					org.codehaus.groovy.grails.documentation.DocumentationContext.instance.active=true
+
+				  def plugin = delegate
+                  def typeConverter = new SimpleTypeConverter()
                   entityClass.metaClass {
                       'static' {
+                          def countLogic = {->
+                            jpaTemplate.execute({ EntityManager em ->
+                              def q = em.createQuery("select count(${logicalName}) from ${entityClass.name} as ${logicalName}")
+                              q.singleResult
+                            } as JpaCallback)
+                          }
+                          // Foo.count()
+                          plugin.doc "Returns the count for the total number of entities"
+                          count countLogic
+
+                          // Foo.count
+                          plugin.doc "Returns the count for the total number of entities"
+                          getCount countLogic
+
                           // Foo.get(1)
-                          get { Serializable id -> jpaTemplate.find(entityClass, id) }
+						  plugin.doc "Retrieves an entity by its identifier"
+                          get { Serializable id ->
+                              Class idType = jpaGrailsDomainClass.identifier.type
+                              if( !idType.isInstance(id) ) {
+                                 id = typeConverter.convertIfNecessary(id,idType)
+                              }
+                              jpaTemplate.find(entityClass, id)
+                          }
+
+                          // Foo.exists(1)
+                          exists { Serializable id ->
+                            get(id)!=null 
+                          }
+
+                          // Foo.executeQuery("select..")
+                          executeQuery { String q ->
+                            jpaTemplate.find(q)
+                          }
+                          // Foo.executeQuery("select..", ['param1'])
+                          executeQuery { String q, List params ->
+                            jpaTemplate.find(q, params.toArray())
+                          }
+
+                          // Foo.executeQuery("select..", [param1:'param1'])
+                          executeQuery { String q, Map params ->
+                            jpaTemplate.findByNamedParams(q, params)
+                          }
+
+                          // Foo.find("select..")
+                          findAll = { String q -> executeQuery(q) }
+                          findAll = { String q, List params -> executeQuery(q, params) }
+                          findAll = { String q, Map params -> executeQuery(q, params) }
+                        
                           // Foo.list(max:10)
+                          plugin.doc "Returns a List of all entities"
                           list { Map args = [:] ->
                               jpaTemplate.executeFind( { EntityManager em ->
                                 def orderBy = ''
@@ -93,8 +155,9 @@ public class JpaPluginSupport {
                               } as JpaCallback)
                           }
                           // Foo.withEntityManager { em -> }
+                          plugin.doc "Allows direct access to the JPA EntityManager"
                           withEntityManager { Closure callable ->
-                              callable.call( jpaTemplate.getEntityManager() ) 
+                              callable.call( jpaTemplate.getEntityManager() )
                           }
                       }
 
@@ -102,8 +165,9 @@ public class JpaPluginSupport {
                         domainClass.constrainedProperties 
                       }
                       // foo.save(flush:true)
+                      plugin.doc "Retrieves an entity by its identifier"
                       save { Map args = [:] ->
-                        if(delegate.validate()) {                          
+                        if(delegate.validate()) {
                           jpaTemplate.persist delegate
                           if(args?.flush) {
                              jpaTemplate.flush()
@@ -112,14 +176,18 @@ public class JpaPluginSupport {
                         }
                       }
                       // foo.delete(flush:true)
-                      delete {Map args = [:]->
+                      plugin.doc "Deletes an entity"
+                      delete { Map args = [:]->
                         jpaTemplate.remove delegate
                         if(args?.flush) {
                            jpaTemplate.flush()
                         }
                       }
                       // foo.refresh()
+                      plugin.doc "Refreshes an entities state"
                       refresh {-> jpaTemplate.refresh delegate }
+
+
                   }
 
 

@@ -17,6 +17,7 @@ package org.grails.jpa.domain;
 import org.codehaus.groovy.grails.commons.AbstractGrailsClass;
 import org.codehaus.groovy.grails.commons.GrailsDomainClass;
 import org.codehaus.groovy.grails.commons.GrailsDomainClassProperty;
+import org.codehaus.groovy.grails.commons.GrailsClassUtils;
 import org.codehaus.groovy.grails.exceptions.GrailsDomainException;
 import org.codehaus.groovy.grails.validation.metaclass.ConstraintsEvaluatingDynamicProperty;
 import org.springframework.validation.Validator;
@@ -33,6 +34,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Field;
 
 import grails.util.GrailsNameUtils;
+import groovy.lang.Closure;
 
 /**
  * Models a JPA domain class hooking the JPA annotations into the Grails meta model
@@ -50,7 +52,7 @@ public class JpaGrailsDomainClass extends AbstractGrailsClass implements GrailsD
     private JpaDomainClassProperty version;
     private Validator validator;
     private GrailsDomainClassProperty[] persistentPropertyArray;
-    private Map constraintedProperties = Collections.emptyMap();
+    private Map constrainedProperties = Collections.EMPTY_MAP;
 
     public JpaGrailsDomainClass(Class clazz) {
         super(clazz, "");
@@ -59,13 +61,26 @@ public class JpaGrailsDomainClass extends AbstractGrailsClass implements GrailsD
             throw new GrailsDomainException("Class ["+clazz.getName()+"] is not annotated with java.persistence.Entity!");
         }
         PropertyDescriptor[] descriptors = BeanUtils.getPropertyDescriptors(clazz);
+        evaluateClassProperties(descriptors);
+        evaluateConstraints();
+        propertiesArray = propertyMap.values().toArray(new GrailsDomainClassProperty[propertyMap.size()]);
+        persistentPropertyArray = persistentProperties.values().toArray(new GrailsDomainClassProperty[persistentProperties.size()]);
+    }
+
+    private void evaluateConstraints() {
+        ConstraintsEvaluatingDynamicProperty constraintsEvaluator = new ConstraintsEvaluatingDynamicProperty(getProperties());
+        this.constrainedProperties = (Map) constraintsEvaluator.get(getReference().getWrappedInstance());
+    }
+
+    private void evaluateClassProperties(PropertyDescriptor[] descriptors) {
         for (PropertyDescriptor descriptor : descriptors) {
 
             final JpaDomainClassProperty property = new JpaDomainClassProperty(this, descriptor);
-            if(property.isIdentity()) {
+            
+            if(property.isAnnotatedWith(Id.class)) {
                 this.identifier = property;
             }
-            else if(property.isVersion()) {
+            else if(property.isAnnotatedWith(Version.class)) {
                 this.version = property;
             }
             else {
@@ -75,10 +90,8 @@ public class JpaGrailsDomainClass extends AbstractGrailsClass implements GrailsD
                 }
             }
         }
-        propertiesArray = propertyMap.values().toArray(new GrailsDomainClassProperty[propertyMap.size()]);
-        persistentPropertyArray = persistentProperties.values().toArray(new GrailsDomainClassProperty[persistentProperties.size()]);
 
-        this.constraintedProperties = (Map) new ConstraintsEvaluatingDynamicProperty(getPersistentProperties()).get(getReference().getWrappedInstance());
+        this.constrainedProperties = (Map) new ConstraintsEvaluatingDynamicProperty(getPersistentProperties()).get(getReference().getWrappedInstance());
     }
 
     public boolean isOwningClass(Class domainClass) {
@@ -106,7 +119,7 @@ public class JpaGrailsDomainClass extends AbstractGrailsClass implements GrailsD
     }
 
     public Map getAssociationMap() {
-        return Collections.emptyMap();
+        return Collections.EMPTY_MAP;
     }
 
     public GrailsDomainClassProperty getPropertyByName(String name) {
@@ -138,7 +151,7 @@ public class JpaGrailsDomainClass extends AbstractGrailsClass implements GrailsD
     }
 
     public Map getConstrainedProperties() {
-        return constraintedProperties;
+        return this.constrainedProperties;
     }
 
     public Validator getValidator() {
@@ -154,11 +167,11 @@ public class JpaGrailsDomainClass extends AbstractGrailsClass implements GrailsD
     }
 
     public boolean isRoot() {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+        return true;
     }
 
     public Set<GrailsDomainClass> getSubClasses() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return Collections.emptySet();
     }
 
     public void refreshConstraints() {
@@ -166,11 +179,11 @@ public class JpaGrailsDomainClass extends AbstractGrailsClass implements GrailsD
     }
 
     public boolean hasSubClasses() {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+        return false;
     }
 
     public Map getMappedBy() {
-        return Collections.emptyMap();
+        return Collections.EMPTY_MAP;
     }
 
     public boolean hasPersistentProperty(String propertyName) {
@@ -192,6 +205,7 @@ public class JpaGrailsDomainClass extends AbstractGrailsClass implements GrailsD
         private Method getter;
         private Column columnAnnotation;
         private boolean persistent;
+        private Field field;
         private boolean version;
 
         public JpaDomainClassProperty(GrailsDomainClass domain, PropertyDescriptor descriptor) {
@@ -202,28 +216,17 @@ public class JpaGrailsDomainClass extends AbstractGrailsClass implements GrailsD
             this.type = descriptor.getPropertyType();
             this.getter = descriptor.getReadMethod();
             try {
-                propertyField = domain.getClazz().getDeclaredField(this.name);
+                this.field = domain.getClazz().getDeclaredField(descriptor.getName());
             } catch (NoSuchFieldException e) {
                 // ignore
             }
-
-            this.columnAnnotation = getColumnAnnotation();
-            this.persistent = !checkAnnotationExists(Transient.class);
-
+            this.columnAnnotation = getAnnotation(javax.persistence.Column.class);
+            this.persistent = !isAnnotatedWith(Transient.class);
         }
 
-        private Column getColumnAnnotation() {
-            if(propertyField!=null) {
-                return propertyField.getAnnotation(Column.class);
-            }
-            return getter.getAnnotation(Column.class);
-        }
-
-        private boolean checkAnnotationExists(Class annotation) {
-            if(propertyField!=null) {
-                return propertyField.getAnnotation(annotation) != null;
-            }
-            return getter.getAnnotation(annotation) != null;
+        public <T extends java.lang.annotation.Annotation> T getAnnotation(Class<T> annotation) {
+            if(field==null) return null;
+            return this.field.getAnnotation(annotation);
         }
 
         public int getFetchMode() {
@@ -263,19 +266,19 @@ public class JpaGrailsDomainClass extends AbstractGrailsClass implements GrailsD
         }
 
         public boolean isIdentity() {
-            return checkAnnotationExists(Id.class);
+            return isAnnotatedWith(javax.persistence.Id.class);
         }
 
         public boolean isOneToMany() {
-            return checkAnnotationExists(OneToMany.class);
+            return isAnnotatedWith(OneToMany.class);
         }
 
         public boolean isManyToOne() {
-            return checkAnnotationExists(ManyToOne.class);
+            return isAnnotatedWith(ManyToOne.class);
         }
 
         public boolean isManyToMany() {
-            return checkAnnotationExists(ManyToMany.class);
+            return isAnnotatedWith(ManyToMany.class);
         }
 
         public boolean isBidirectional() {
@@ -287,7 +290,7 @@ public class JpaGrailsDomainClass extends AbstractGrailsClass implements GrailsD
         }
 
         public boolean isOneToOne() {
-            return checkAnnotationExists(OneToOne.class);
+            return isAnnotatedWith(OneToOne.class);
         }
 
         public GrailsDomainClass getReferencedDomainClass() {
@@ -331,7 +334,7 @@ public class JpaGrailsDomainClass extends AbstractGrailsClass implements GrailsD
         }
 
         public boolean isEmbedded() {
-            return checkAnnotationExists(Embedded.class);
+            return isAnnotatedWith(Embedded.class);
         }
 
         public GrailsDomainClass getComponent() {
@@ -346,8 +349,9 @@ public class JpaGrailsDomainClass extends AbstractGrailsClass implements GrailsD
             return false;  //To change body of implemented methods use File | Settings | File Templates.
         }
 
-        public boolean isVersion() {
-            return checkAnnotationExists(Version.class);
+        public boolean isAnnotatedWith(Class annotation) {
+            if(field==null) return false;
+            return field.getAnnotation(annotation)!=null;
         }
     }
 }

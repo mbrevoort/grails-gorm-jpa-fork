@@ -13,4 +13,5 @@ A plugin that emulates the behavior of the GORM-Hibernate plugin against a stand
     <resource>org.acme.Person</resource>
   </resources>
   <dependencies />
+  <behavior />
 </plugin>

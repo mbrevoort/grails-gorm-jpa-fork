@@ -38,6 +38,14 @@ public class JpaGrailsDomainClassTests extends GroovyTestCase{
 
     }
 
+    void testConstraints() {
+      def personDomain = new JpaGrailsDomainClass(Person)
+
+      assertNotNull personDomain.constrainedProperties
+      assertNotNull personDomain.constrainedProperties['name']  
+
+    }
+
     void testPersistentProperties() {
       def personDomain = new JpaGrailsDomainClass(Person)
 
@@ -45,5 +53,4 @@ public class JpaGrailsDomainClassTests extends GroovyTestCase{
       assertFalse "leaveMe property should be transient", personDomain.getPropertyByName("leaveMe").isPersistent()
 
     }
-
 }
