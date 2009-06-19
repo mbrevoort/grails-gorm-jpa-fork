@@ -15,32 +15,25 @@
  */
 package org.grails.jpa
 
-import org.springframework.beans.factory.generic.GenericBeanFactoryAccessor
-import org.springframework.context.ApplicationContext
-import javax.persistence.Entity
-import org.grails.spring.scope.PrototypeScopeMetadataResolver
-import javax.persistence.EntityManagerFactory
-import org.grails.jpa.exceptions.JpaPluginException
-import org.springframework.orm.jpa.JpaTemplate
-import org.springframework.orm.jpa.JpaCallback
-import javax.persistence.EntityManager
 import grails.util.GrailsNameUtils
+import java.beans.Introspector
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.grails.jpa.domain.JpaDomainClassArtefactHandler
 import org.grails.jpa.domain.JpaGrailsDomainClass
+import org.grails.jpa.exceptions.JpaPluginException
+import org.grails.spring.scope.PrototypeScopeMetadataResolver
 import org.springframework.beans.SimpleTypeConverter
-import javax.persistence.Query
-import org.codehaus.groovy.grails.commons.GrailsDomainClass
-import org.codehaus.groovy.grails.commons.DomainClassArtefactHandler
-import javax.persistence.LockModeType
-import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.beans.factory.generic.GenericBeanFactoryAccessor
+import org.springframework.context.ApplicationContext
+import org.springframework.orm.jpa.JpaCallback
+import org.springframework.orm.jpa.JpaTemplate
 import org.springframework.orm.jpa.JpaTransactionManager
-import org.springframework.transaction.support.TransactionTemplate
-import org.springframework.transaction.support.TransactionCallback
-import org.springframework.transaction.interceptor.TransactionAspectSupport
-import javax.persistence.FlushModeType
 import org.springframework.transaction.NoTransactionException
-import java.beans.Introspector
+import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.interceptor.TransactionAspectSupport
+import org.springframework.transaction.support.TransactionCallback
+import org.springframework.transaction.support.TransactionTemplate
+import javax.persistence.*
 
 /**
  * @author Graeme Rocher
@@ -102,9 +95,7 @@ public class JpaPluginSupport {
 
                   JpaGrailsDomainClass jpaGrailsDomainClass = domainClass
                   Class entityClass = jpaGrailsDomainClass.clazz
-                  def logicalName = GrailsNameUtils.getLogicalPropertyName(entityClass.name,'') 
-
-					org.codehaus.groovy.grails.documentation.DocumentationContext.instance.active=true
+                  def logicalName = GrailsNameUtils.getLogicalPropertyName(entityClass.name,'')
 
 				  def plugin = delegate
                   def typeConverter = new SimpleTypeConverter()

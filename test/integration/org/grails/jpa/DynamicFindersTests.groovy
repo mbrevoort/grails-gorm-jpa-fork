@@ -17,6 +17,7 @@ public class DynamicFindersTests extends GroovyTestCase{
     new Person(name:"Ed", age:22).save()
     new Person(name:"Frank", age:3).save()
     new Person(name:"Ricky", age:11).save()
+    new Person(name:"Tobby").save()
 
   }
 
@@ -89,5 +90,65 @@ public class DynamicFindersTests extends GroovyTestCase{
     assertEquals "should have contained Frank", "Frank", people.find { it.name == "Frank" }?.name
   }
 
+
+  void testFindAllWithOr() {
+      def people = Person.findAllByNameOrAge("Fred", 11)
+
+      assertNotNull "should have returned a list", people
+      assertEquals "should have returned 3 results",3, people.size()
+
+      // call it again to exercise cached version
+      people = Person.findAllByNameOrAge("Fred", 11)
+
+      assertNotNull "should have returned a list", people
+      assertEquals "should have returned 3 results",3, people.size()
+
+  }
+
+  void testFindAllWithBetween() {
+      def people = Person.findAllByAgeBetween(10,15)
+
+      assertNotNull "should have returned a list", people
+      assertEquals "should have returned 3 results",3, people.size()
+
+      // call it again to exercise cached version
+      people = Person.findAllByAgeBetween(10,15)
+
+      assertNotNull "should have returned a list", people
+      assertEquals "should have returned 3 results",3, people.size()
+
+  }
+
+  void testFindAllWithGreaterThan() {
+      def people = Person.findAllByAgeGreaterThan(14)
+
+      assertNotNull "should have returned a list", people
+      assertEquals "should have returned 1 results",1, people.size()
+
+      // call it again to exercise cached version
+      people = Person.findAllByAgeGreaterThan(14)
+
+      assertNotNull "should have returned a list", people
+      assertEquals "should have returned 1 results",1, people.size()
+
+      assertEquals "Ed", people[0].name
+
+  }
+
+
+  void testFindAllWithGreaterThanEquals() {
+      def people = Person.findAllByAgeGreaterThanEquals(14)
+
+      assertNotNull "should have returned a list", people
+      assertEquals "should have returned 2 results",2, people.size()
+
+      // call it again to exercise cached version
+      people = Person.findAllByAgeGreaterThanEquals(14)
+
+      assertNotNull "should have returned a list", people
+      assertEquals "should have returned 2 results",2, people.size()
+
+
+  }
 
 }
