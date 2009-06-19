@@ -221,15 +221,12 @@ public class JpaPluginSupport {
                             } as JpaCallback)
                           }
                           // Foo.count()
-                          plugin.doc "Returns the count for the total number of entities"
                           count countLogic
 
                           // Foo.count
-                          plugin.doc "Returns the count for the total number of entities"
                           getCount countLogic
 
                           // Foo.get(1)
-						  plugin.doc "Retrieves an entity by its identifier"
                           get { Serializable id ->
                               Class idType = jpaGrailsDomainClass.identifier.type
                               if( !idType.isInstance(id) ) {
@@ -373,7 +370,6 @@ public class JpaPluginSupport {
                           }
                         
                           // Foo.list(max:10)
-                          plugin.doc "Returns a List of all entities"
                           list { Map args = [:] ->
                               jpaTemplate.executeFind( { EntityManager em ->
                                 def orderBy = ''
@@ -413,7 +409,6 @@ public class JpaPluginSupport {
                             return obj
                           }
                           // Foo.withEntityManager { em -> }
-                          plugin.doc "Allows direct access to the JPA EntityManager"
                           withEntityManager { Closure callable ->
                               jpaTemplate.execute({ EntityManager em ->
                                    callable.call( em )
@@ -421,7 +416,6 @@ public class JpaPluginSupport {
                           }
 
                           // Foo.withTransaction { status -> }
-                          plugin.doc "Initiates a programmatic Spring transaction"
                           withTransaction { Closure callable ->
                             if(!transactionManagerBean) throw new IllegalStateException("No transactionManager bean is defined! Register a JpaTransactionManager in your Spring configuration.")
 
@@ -435,7 +429,6 @@ public class JpaPluginSupport {
                         domainClass.constrainedProperties 
                       }
                       // foo.save(flush:true)
-                      plugin.doc "Retrieves an entity by its identifier"
                       save { Map args = [:] ->
                         if(delegate.validate()) {
                           jpaTemplate.persist delegate
@@ -451,7 +444,6 @@ public class JpaPluginSupport {
                       }
 
                       // foo.merge(flush:true)
-                      plugin.doc "Merges a detached entity or saves an new entity into the persistence context"                    
                       merge { Map args = [:] ->
                         if(delegate.validate()) {
                           jpaTemplate.merge delegate
@@ -467,7 +459,6 @@ public class JpaPluginSupport {
 
                       }
                       // foo.delete(flush:true)
-                      plugin.doc "Deletes an entity"
                       delete { Map args = [:]->
                         jpaTemplate.remove delegate
                         if(args?.flush) {
@@ -475,11 +466,9 @@ public class JpaPluginSupport {
                         }
                       }
                       // foo.refresh()
-                      plugin.doc "Refreshes an entities state"
                       refresh {-> jpaTemplate.refresh delegate }
 
                       // foo.lock()
-                      plugin.doc "Establishes a write lock"
                       lock {->
                         def object = delegate
                         jpaTemplate.execute({ EntityManager em ->
