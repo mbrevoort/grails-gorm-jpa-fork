@@ -247,5 +247,21 @@
     <mapping directory="" vcs="svn" />
   </component>
   <component name="WebServicesPlugin" addRequiredLibraries="true" />
+  <component name="libraryTable">
+    <library name="AppEngineORM">
+      <CLASSES>
+        <root url="jar:///Developer/appengine-java-sdk-1.2.1/lib/user/orm/datanucleus-core-1.1.0.jar!/" />
+        <root url="jar:///Developer/appengine-java-sdk-1.2.1/lib/user/orm/geronimo-jpa_3.0_spec-1.1.1.jar!/" />
+        <root url="jar:///Developer/appengine-java-sdk-1.2.1/lib/user/orm/datanucleus-appengine-1.0.1.final.jar!/" />
+        <root url="jar:///Developer/appengine-java-sdk-1.2.1/lib/user/orm/jdo2-api-2.3-SNAPSHOT.jar!/" />
+        <root url="jar:///Developer/appengine-java-sdk-1.2.1/lib/user/orm/geronimo-jta_1.1_spec-1.1.1.jar!/" />
+        <root url="jar:///Developer/appengine-java-sdk-1.2.1/lib/user/orm/datanucleus-jpa-1.1.0.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES>
+        <root url="file:///Developer/appengine-java-sdk-1.2.1/src/orm/datanucleus-core-1.1.0/src/java" />
+      </SOURCES>
+    </library>
+  </component>
 </project>
 

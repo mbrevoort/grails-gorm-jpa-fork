@@ -3,11 +3,19 @@
   <component name="ChangeListManager">
     <list default="true" readonly="true" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Gorm-jpa.iml" afterPath="$PROJECT_DIR$/src/Gorm-jpa.iml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/gorm-jpa.ipr" afterPath="$PROJECT_DIR$/gorm-jpa.ipr" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/groovy/org/grails/jpa/JpaPluginSupport.groovy" afterPath="$PROJECT_DIR$/src/groovy/org/grails/jpa/JpaPluginSupport.groovy" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/gorm-jpa.launch" afterPath="$PROJECT_DIR$/gorm-jpa.launch" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/plugin.xml" afterPath="$PROJECT_DIR$/plugin.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/gorm-jpa.iws" afterPath="$PROJECT_DIR$/gorm-jpa.iws" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/web-app/WEB-INF/sitemesh.xml" afterPath="$PROJECT_DIR$/web-app/WEB-INF/sitemesh.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/web-app/WEB-INF/tld/grails.tld" afterPath="$PROJECT_DIR$/web-app/WEB-INF/tld/grails.tld" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.classpath" afterPath="$PROJECT_DIR$/.classpath" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/GormJpaGrailsPlugin.groovy" afterPath="$PROJECT_DIR$/GormJpaGrailsPlugin.groovy" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/application.properties" afterPath="$PROJECT_DIR$/application.properties" />
     </list>
-    <ignored path=".idea/workspace.xml" />
     <ignored path="gorm-jpa.iws" />
+    <ignored path=".idea/workspace.xml" />
   </component>
   <component name="ChangesViewManager" flattened_view="true" show_ignored="false" />
   <component name="Commander">
@@ -24,7 +32,7 @@
   </component>
   <component name="DebuggerManager">
     <line_breakpoints>
-      <breakpoint url="file:///Developer/grails-dev/core/grails/grails/src/commons/org/codehaus/groovy/grails/test/GrailsTestSuite.java" line="92" class="org.codehaus.groovy.grails.test.GrailsTestSuite" package="org.codehaus.groovy.grails.test">
+      <breakpoint url="file:///Developer/appengine-java-sdk-1.2.1/src/orm/datanucleus-core-1.1.0/src/java/org/datanucleus/query/compiler/JPQLParser.java" line="1220" class="org.datanucleus.query.compiler.JPQLParser" package="org.datanucleus.query.compiler">
         <option name="ENABLED" value="true" />
         <option name="LOG_ENABLED" value="false" />
         <option name="LOG_EXPRESSION_ENABLED" value="false" />
@@ -78,26 +86,29 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="GormJpaGrailsPlugin.groovy" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="GormJpaGrailsPlugin.groovy" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/GormJpaGrailsPlugin.groovy">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="50" column="53" selection-start="1832" selection-end="1832" vertical-scroll-proportion="0.0">
+            <state line="26" column="22" selection-start="984" selection-end="984" vertical-scroll-proportion="0.059139784">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="JpaPluginSupport.groovy" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/groovy/org/grails/jpa/JpaPluginSupport.groovy">
+      <file leaf-file-name="JPQLCompiler.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file:///Developer/appengine-java-sdk-1.2.1/src/orm/datanucleus-core-1.1.0/src/java/org/datanucleus/query/compiler/JPQLCompiler.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="485" column="147" selection-start="23190" selection-end="23197" vertical-scroll-proportion="0.47803617">
-              <folding>
-                <marker date="1245411133000" expanded="true" signature="21430:23001" placeholder="{...}" />
-                <marker date="1245411133000" expanded="true" signature="21430:21662" placeholder="{...}" />
-                <marker date="1245411133000" expanded="true" signature="21430:21456" placeholder="{...}" />
-                <marker date="1245411133000" expanded="true" signature="22335:22544" placeholder="{...}" />
-                <marker date="1245411133000" expanded="true" signature="22446:22520" placeholder="{...}" />
-              </folding>
+            <state line="34" column="13" selection-start="1280" selection-end="1280" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="JPQLParser.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file:///Developer/appengine-java-sdk-1.2.1/src/orm/datanucleus-core-1.1.0/src/java/org/datanucleus/query/compiler/JPQLParser.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="1226" column="0" selection-start="43321" selection-end="43321" vertical-scroll-proportion="0.0">
+              <folding />
             </state>
           </provider>
         </entry>
@@ -161,22 +172,22 @@
     <property name="GoToClass.toSaveIncludeLibraries" value="false" />
     <property name="RunManagerConfig.showSettingsBeforeRunnig" value="true" />
   </component>
-  <component name="RunManager" selected="JUnit.DynamicFindersTests.testSimpleDynamicFinder">
-    <tempConfiguration default="false" name="DynamicFindersTests.testSimpleDynamicFinder" type="JUnit" factoryName="JUnit" enabled="false" merge="false" runner="emma">
+  <component name="RunManager" selected="Remote.AppEngine Remote">
+    <tempConfiguration default="false" name="DynamicFindersTests.testSimpleDynamicFinder" type="JUnit" factoryName="JUnit" enabled="false" merge="false" sample_coverage="true" runner="emma">
       <pattern>
         <option name="PATTERN" value="org.grails.jpa.*" />
         <option name="ENABLED" value="true" />
       </pattern>
       <module name="Gorm-jpa" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="ALTERNATIVE_JRE_PATH" value="" />
       <option name="PACKAGE_NAME" value="org.grails.jpa" />
       <option name="MAIN_CLASS_NAME" value="org.grails.jpa.DynamicFindersTests" />
       <option name="METHOD_NAME" value="testSimpleDynamicFinder" />
       <option name="TEST_OBJECT" value="method" />
-      <option name="VM_PARAMETERS" />
-      <option name="PARAMETERS" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="VM_PARAMETERS" value="" />
+      <option name="PARAMETERS" value="" />
+      <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
       <option name="ENV_VARIABLES" />
       <option name="PASS_PARENT_ENVS" value="true" />
       <option name="ADDITIONAL_CLASS_PATH" />
@@ -267,7 +278,7 @@
       <module name="" />
       <envs />
     </configuration>
-    <configuration default="false" name="Unnamed" type="Remote" factoryName="Remote">
+    <configuration default="false" name="Grails Remote" type="Remote" factoryName="Remote">
       <option name="USE_SOCKET_TRANSPORT" value="true" />
       <option name="SERVER_MODE" value="false" />
       <option name="SHMEM_ADDRESS" value="javadebug" />
@@ -283,9 +294,26 @@
         <option name="Make" value="true" />
       </method>
     </configuration>
-    <list size="2">
+    <configuration default="false" name="AppEngine Remote" type="Remote" factoryName="Remote">
+      <option name="USE_SOCKET_TRANSPORT" value="true" />
+      <option name="SERVER_MODE" value="false" />
+      <option name="SHMEM_ADDRESS" value="javadebug" />
+      <option name="HOST" value="localhost" />
+      <option name="PORT" value="9999" />
+      <RunnerSettings RunnerId="Debug">
+        <option name="DEBUG_PORT" value="9999" />
+        <option name="TRANSPORT" value="0" />
+        <option name="LOCAL" value="false" />
+      </RunnerSettings>
+      <ConfigurationWrapper RunnerId="Debug" />
+      <method>
+        <option name="Make" value="true" />
+      </method>
+    </configuration>
+    <list size="3">
       <item index="0" class="java.lang.String" itemvalue="JUnit.DynamicFindersTests.testSimpleDynamicFinder" />
-      <item index="1" class="java.lang.String" itemvalue="Remote.Unnamed" />
+      <item index="1" class="java.lang.String" itemvalue="Remote.Grails Remote" />
+      <item index="2" class="java.lang.String" itemvalue="Remote.AppEngine Remote" />
     </list>
     <configuration name="&lt;template&gt;" type="WebApp" default="true" selected="false">
       <Host>localhost</Host>
@@ -331,32 +359,33 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="84" y="154" width="983" height="746" extended-state="0" />
+    <frame x="47" y="22" width="1393" height="877" extended-state="0" />
     <editor active="false" />
     <layout>
-      <window_info id="Web Preview" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" />
-      <window_info id="Dataflow to this" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="14" side_tool="false" />
+      <window_info id="Web Preview" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="9" side_tool="false" />
+      <window_info id="Dataflow to this" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="15" side_tool="false" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" />
       <window_info id="Data Sources" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="5" side_tool="false" />
       <window_info id="IDEtalk" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" />
-      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32762313" sideWeight="0.7073579" order="0" side_tool="false" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32980132" sideWeight="0.5" order="1" side_tool="false" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32738096" sideWeight="0.7771883" order="0" side_tool="false" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32980132" sideWeight="0.5" order="2" side_tool="false" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" />
-      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="6" side_tool="false" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3986755" sideWeight="0.5" order="9" side_tool="false" />
-      <window_info id="Dependency Viewer" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="11" side_tool="false" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="7" side_tool="false" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3986755" sideWeight="0.5" order="10" side_tool="false" />
+      <window_info id="Dependency Viewer" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="12" side_tool="false" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="4" side_tool="false" />
+      <window_info id="Grails" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32891247" sideWeight="0.5" order="0" side_tool="false" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" />
-      <window_info id="Changes" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.26923078" sideWeight="0.5" order="12" side_tool="false" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.397351" sideWeight="0.5" order="2" side_tool="false" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="4" side_tool="false" />
-      <window_info id="IDEtalk Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="13" side_tool="false" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="10" side_tool="false" />
-      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" />
+      <window_info id="Changes" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.21352786" sideWeight="0.5" order="13" side_tool="false" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.397351" sideWeight="0.5" order="3" side_tool="false" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39920425" sideWeight="0.5" order="5" side_tool="false" />
+      <window_info id="IDEtalk Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="14" side_tool="false" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="11" side_tool="false" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="false" />
       <window_info id="Web" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" />
-      <window_info id="EJB" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="3" side_tool="false" />
-      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="5" side_tool="false" />
+      <window_info id="EJB" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="6" side_tool="false" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.25" sideWeight="0.66225165" order="2" side_tool="false" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" />
     </layout>
@@ -400,27 +429,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/java/org/grails/jpa/domain/JpaGrailsDomainClass.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="74" column="8" selection-start="3315" selection-end="3315" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar:///Developer/grails-dev/core/grails/grails/lib/ejb3-persistence-3.3.0.jar!/javax/persistence/EntityManager.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="23" column="54" selection-start="646" selection-end="646" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar:///Developer/grails-dev/core/grails/grails/lib/spring-2.5.6.jar!/org/springframework/transaction/support/TransactionTemplate.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar:///Developer/grails-dev/core/grails/grails/lib/ejb3-persistence-3.3.0.jar!/javax/persistence/LockModeType.class">
       <provider selected="true" editor-type-id="text-editor">
         <state line="5" column="18" selection-start="160" selection-end="160" vertical-scroll-proportion="0.0">
@@ -501,23 +509,44 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/GormJpaGrailsPlugin.groovy">
+    <entry file="jar:///Developer/grails-dev/core/grails/grails/lib/spring-2.5.6.jar!/org/springframework/orm/jpa/JpaTransactionManager.class">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="50" column="53" selection-start="1832" selection-end="1832" vertical-scroll-proportion="0.0">
+        <state line="5" column="34" selection-start="165" selection-end="186" vertical-scroll-proportion="0.15469614">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///Developer/appengine-java-sdk-1.2.1/src/orm/datanucleus-core-1.1.0/src/java/org/datanucleus/query/compiler/JPQLCompiler.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="34" column="13" selection-start="1280" selection-end="1280" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///Developer/appengine-java-sdk-1.2.1/src/orm/datanucleus-core-1.1.0/src/java/org/datanucleus/query/compiler/JPQLParser.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="1226" column="0" selection-start="43321" selection-end="43321" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/groovy/org/grails/jpa/JpaPluginSupport.groovy">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="485" column="147" selection-start="23190" selection-end="23197" vertical-scroll-proportion="0.47803617">
+        <state line="37" column="0" selection-start="1694" selection-end="1694" vertical-scroll-proportion="0.5021097">
           <folding>
-            <marker date="1245411133000" expanded="true" signature="21430:23001" placeholder="{...}" />
-            <marker date="1245411133000" expanded="true" signature="21430:21662" placeholder="{...}" />
-            <marker date="1245411133000" expanded="true" signature="21430:21456" placeholder="{...}" />
-            <marker date="1245411133000" expanded="true" signature="22335:22544" placeholder="{...}" />
-            <marker date="1245411133000" expanded="true" signature="22446:22520" placeholder="{...}" />
+            <marker date="1245428697000" expanded="true" signature="22284:23855" placeholder="{...}" />
+            <marker date="1245428697000" expanded="true" signature="22284:22516" placeholder="{...}" />
+            <marker date="1245428697000" expanded="true" signature="22284:22310" placeholder="{...}" />
+            <marker date="1245428697000" expanded="true" signature="23189:23398" placeholder="{...}" />
+            <marker date="1245428697000" expanded="true" signature="23300:23374" placeholder="{...}" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/GormJpaGrailsPlugin.groovy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="26" column="22" selection-start="984" selection-end="984" vertical-scroll-proportion="0.059139784">
+          <folding />
         </state>
       </provider>
     </entry>

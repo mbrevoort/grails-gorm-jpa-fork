@@ -85,6 +85,9 @@ public class JpaPluginSupport {
               JpaTemplate jpaTemplate = new JpaTemplate(entityManagerFactory)
 
               GrailsApplication app = application
+              
+              boolean appEngine = manager.hasGrailsPlugin("appEngine")
+            
               for(entry in entityBeans) {
                  Class entityClass = entry.value.class
                  app.addArtefact(JpaDomainClassArtefactHandler.TYPE, new JpaGrailsDomainClass(entityClass))                 
@@ -138,14 +141,29 @@ public class JpaPluginSupport {
                             boolean singleResult = !m[0][1]
 
                             def first = fields[0]
-                            queryString << "(${logicalName}.${first.field} ${JpaPluginSupport.getJpaQLExpressionFor(first.comparator)})"
+                            int state = 0
+                            def expr
+                            if(appEngine) {
+                              (expr,state) = JpaPluginSupport.getJpaQLExpressionForAppEngine(first.comparator, state)
+                            }
+                            else {
+                              expr = JpaPluginSupport.getJpaQLExpressionFor(first.comparator)
+                            }
+                            queryString << "(${logicalName}.${first.field} ${expr})"
                             if(join) {
                                 if(join == "Or") queryString << " or "
                                 else queryString << " and "
                                 def second = fields[1]
-                                queryString << "(${logicalName}.${second.field} ${JpaPluginSupport.getJpaQLExpressionFor(second.comparator)})"
+                                if(appEngine) {
+                                  (expr,state) = JpaPluginSupport.getJpaQLExpressionForAppEngine(second.comparator, state)
+                                }
+                                else {
+                                  expr = JpaPluginSupport.getJpaQLExpressionFor(first.comparator)
+                                }
+                                queryString << "(${logicalName}.${second.field} ${expr})"
                             }
 
+                            queryString = queryString.toString()
                             // cache new behavior
                             def newMethod = { Object[] varArgs ->
                                  def localArgs = varArgs ? varArgs[0] : []
@@ -153,7 +171,7 @@ public class JpaPluginSupport {
 
                                  jpaTemplate.execute({ EntityManager em ->
 
-                                   Query query = em.createQuery(queryString.toString())
+                                   Query query = em.createQuery(queryString)
 
                                    def queryParams
                                    if(localArgs && (localArgs[-1] instanceof Map)) {
@@ -500,6 +518,26 @@ public class JpaPluginSupport {
     }
   }
 
+  public static getJpaQLExpressionForAppEngine(String comparator, int state) {
+      // default to equals
+      def result = " = ?${++state} "
+      switch(comparator) {
+          case "IsNull": result = " is null "; break
+          case "IsNotNull": result = " is not null "; break
+          case "Like": result = " like ?${++state} "; break
+          case "Between": result = " between ?${++state} and ?${++state} "; break
+          case "NotBetween": result = " not between ?${++state} and ?${++state} "; break
+          case "InList": result = " in (?${++state}) "; break
+          case "NotInList": result = " not in (?${++state}) "; break
+          case "LessThan": result = " < ?${++state} "; break
+          case "LessThanEquals": result = " <= ?${++state} "; break
+          case "GreaterThan": result = " > ?${++state} "; break
+          case "GreaterThanEquals": result = " >= ?${++state} "; break
+          case "NotEqual": result = " != ?${++state} "; break
+      }
+      return [result, state]
+  }
+
   public static getJpaQLExpressionFor(String comparator) {
       // default to equals
       def result = " = ? "
@@ -515,7 +553,7 @@ public class JpaPluginSupport {
           case "LessThanEquals": result = " <= ? "; break
           case "GreaterThan": result = " > ? "; break
           case "GreaterThanEquals": result = " >= ? "; break
-          case "NotEqual": result = " != ? "; break        
+          case "NotEqual": result = " != ? "; break
       }
       return result
   }
