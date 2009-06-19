@@ -18,6 +18,9 @@ class Person {
 
     String name
 
+    @Column(nullable = true)
+    Integer age
+
     @Transient
     String leaveMe
 
@@ -26,5 +29,6 @@ class Person {
 
     static constraints = {
         name blank:false
+
     }
 }

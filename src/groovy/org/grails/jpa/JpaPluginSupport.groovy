@@ -32,6 +32,15 @@ import org.springframework.beans.SimpleTypeConverter
 import javax.persistence.Query
 import org.codehaus.groovy.grails.commons.GrailsDomainClass
 import org.codehaus.groovy.grails.commons.DomainClassArtefactHandler
+import javax.persistence.LockModeType
+import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.orm.jpa.JpaTransactionManager
+import org.springframework.transaction.support.TransactionTemplate
+import org.springframework.transaction.support.TransactionCallback
+import org.springframework.transaction.interceptor.TransactionAspectSupport
+import javax.persistence.FlushModeType
+import org.springframework.transaction.NoTransactionException
+import java.beans.Introspector
 
 /**
  * @author Graeme Rocher
@@ -41,7 +50,20 @@ import org.codehaus.groovy.grails.commons.DomainClassArtefactHandler
  */
 public class JpaPluginSupport {
 
-
+  static final COMPARATORS = Collections.unmodifiableList([
+          "IsNull",
+          "IsNotNull",
+          "LessThan",
+          "LessThanEquals",
+          "GreaterThan",
+          "GreaterThanEquals",
+          "NotEqual",
+          "Like",
+          "Ilike",
+          "Between" ])
+  static final COMPARATORS_RE = COMPARATORS.join("|")
+  static final DYNAMIC_FINDER_RE = /(\w+?)(${COMPARATORS_RE})?((And|Or)(\w+?)(${COMPARATORS_RE})?)?/
+  
 
   static doWithSpring = {
           xmlns context:"http://www.springframework.org/schema/context"
@@ -54,6 +76,14 @@ public class JpaPluginSupport {
           def entityBeans = accessor.getBeansWithAnnotation(Entity)
 
           def entityManagerFactoryBean = applicationContext.getBeansOfType(EntityManagerFactory)
+          Map transactionManagerBeans = applicationContext.getBeansOfType(PlatformTransactionManager)
+          PlatformTransactionManager transactionManagerBean
+          transactionManagerBeans.each {key, value ->
+            if(value instanceof JpaTransactionManager) {
+                transactionManagerBean = value
+            }
+          }
+
           if(entityManagerFactoryBean) {
               EntityManagerFactory entityManagerFactory = entityManagerFactoryBean.values().iterator().next()
               JpaTemplate jpaTemplate = new JpaTemplate(entityManagerFactory)
@@ -75,6 +105,118 @@ public class JpaPluginSupport {
 
 				  def plugin = delegate
                   def typeConverter = new SimpleTypeConverter()
+                  // dynamic finder handling with methodMissing
+                  entityClass.metaClass.static.methodMissing = { method, args ->
+                    def m = method =~ /^find(All)?By${DYNAMIC_FINDER_RE}$/
+                    if (m) {
+                        def fields = []
+                        def comparator = m[0][3]
+                        // How many arguments do we need to pass for the given
+                        // comparator?
+                        def numArgs = getArgCountForComparator(comparator)
+
+                        fields << [field:Introspector.decapitalize(m[0][2]),
+                                   args:args[0..<numArgs],
+                                   argCount:numArgs,
+                                   comparator:comparator]
+
+                        // Strip out that number of arguments from the ones
+                        // we've been passed.
+                        args = args[numArgs..<args.size()]
+
+                        // If we have a second clause, evaluate it now.
+                        def join = m[0][5]
+
+                        if (join) {
+                            comparator = m[0][7]
+                            numArgs = getArgCountForComparator(comparator)
+                            fields << [field: Introspector.decapitalize(m[0][6]),
+                                       args:args[0..<numArgs],
+                                       argCount:numArgs,
+                                       comparator:comparator]
+                        }
+
+                        // synchronized the update to the MetaClass, note this is
+                        // only necessary during method missing and next call to this
+                        // method will not hit the synchronized block at all
+                        synchronized(this) {
+                            def queryString = new StringBuilder("select $logicalName from $entityClass.name as $logicalName where ")
+                            boolean singleResult = !m[0][1]
+
+                            def first = fields[0]
+                            queryString << "(${first.field} = ?)"
+                            if(join) {
+                                if(join == "Or") queryString << " or "
+                                else queryString << " and "
+                                def second = fields[1]
+                                queryString << "(${second.field} = ?)"
+                            }
+
+                            // cache new behavior
+                            def newMethod = { Object[] varArgs ->
+                                 def localArgs = varArgs ? varArgs[0] : []
+                                 if(!localArgs) throw new MissingMethodException(method, delegate, localArgs)
+
+                                 jpaTemplate.execute({ EntityManager em ->
+
+                                   Query query = em.createQuery(queryString.toString())
+
+                                   def queryParams
+                                   if(localArgs && (localArgs[-1] instanceof Map)) {
+                                      queryParams = localArgs[-1]
+                                      localArgs = localArgs[0..-2]
+                                   }
+
+                                   localArgs.eachWithIndex {val, int i ->
+                                      query.setParameter(i+1, val)
+                                   }
+
+                                   if(queryParams) {
+                                      if(queryParams.max)
+                                        query.setMaxResults(queryParams.max.toInteger())
+                                      if(queryParams.offset)
+                                        query.setFirstResult(queryParams.offset.toInteger())
+                                   }
+                                   if(singleResult) {
+                                       query.setMaxResults(1)
+                                       try {
+                                         return query.singleResult
+                                       } catch (javax.persistence.NoResultException e) {
+                                         return null
+                                       }
+                                   }
+                                   else {
+                                       return query.resultList
+                                   }
+
+                                 } as JpaCallback)
+                            }
+
+                            // register new cached behavior on metaclass to speed up next invokation
+                            entityClass.metaClass.static."$method" = newMethod
+
+                            // Check whether we have any options, such as "sort".
+                            def queryParams
+                            if (args) {
+                                if(args[0] instanceof Map) {
+                                  queryParams = args[0]
+                                }
+                            }
+
+
+                            def finalArgs = fields.collect { it.args }.flatten()
+                            if(queryParams) {
+                                finalArgs << queryParams
+                            }
+                            // invoke new behavior
+                            return newMethod(finalArgs)
+                        }
+
+                    } else {
+                        throw new MissingMethodException(method, delegate, args)
+                    }
+                }
+
                   entityClass.metaClass {
                       'static' {
                           def countLogic = {->
@@ -120,10 +262,111 @@ public class JpaPluginSupport {
                             jpaTemplate.findByNamedParams(q, params)
                           }
 
-                          // Foo.find("select..")
+                          // Foo.executeUpdate("delete from ...")
+                          executeUpdate { String dml ->
+                            jpaTemplate.execute({ EntityManager em ->
+                              Query q = em.createQuery(dml)
+                              q.executeUpdate()
+                            } as JpaCallback)
+                          }
+                          // Foo.executeUpdate("delete from ...", ['param'])
+                          executeUpdate { String dml, List params ->
+                            jpaTemplate.execute({ EntityManager em ->
+                              Query q = em.createQuery(dml)
+                              params.eachWithIndex { val, int i ->
+                                q.setParameter(i+1, val)
+                              }
+                              q.executeUpdate()
+                            } as JpaCallback)
+                          }
+                          // Foo.executeUpdate("delete from ...", [name:'param'])
+                          executeUpdate { String dml, Map params ->
+                            jpaTemplate.execute({ EntityManager em ->
+                              Query q = em.createQuery(dml)
+                              params.each {String name, val ->
+                                q.setParameter(name, val)
+                              }
+                              q.executeUpdate()
+                            } as JpaCallback)
+                          }
+
+
+
+                          // Foo.findAll("select..")
                           findAll = { String q -> executeQuery(q) }
                           findAll = { String q, List params -> executeQuery(q, params) }
                           findAll = { String q, Map params -> executeQuery(q, params) }
+
+                          // Foo.find("select..")
+                          find = { String q ->
+                              jpaTemplate.execute({ EntityManager em ->
+                                Query query = em.createQuery(q)
+                                query.setMaxResults(1)
+                                try {
+                                  return query.singleResult
+                                } catch (javax.persistence.NoResultException e) {
+                                  return null
+                                }
+                              } as JpaCallback)
+                          }
+                          // Foo.find("select..", ['param1'] )
+                          find = { String q, List params ->
+                            jpaTemplate.execute({ EntityManager em ->
+                              Query query = em.createQuery(q)
+                              query.setMaxResults(1)
+                              params.eachWithIndex { val, int i ->
+                                query.setParameter(i+1, val)
+                              }
+                              try {
+                                return query.singleResult
+                              } catch (javax.persistence.NoResultException e) {
+                                return null
+                              }
+                            } as JpaCallback)
+
+                          }
+                          // Foo.find("select..", [param1:'param1'])
+                          find = { String q, Map params ->
+                              jpaTemplate.execute({ EntityManager em ->
+                                Query query = em.createQuery(q)
+                                params.each { String name, value -> query.setParameter(name, value)}
+                                query.setMaxResults(1)
+                                try {
+                                  return query.singleResult
+                                } catch (javax.persistence.NoResultException e) {
+                                  return null
+                                }
+                              } as JpaCallback)
+                          }
+
+                          // Foo.findWhere(param1:"param1")
+                          findWhere { Map params ->
+                            jpaTemplate.execute({ EntityManager em ->
+                              def whereClause = params.keySet().collect {
+                                 "${logicalName}.$it = :$it"
+                              }.join(" and ")
+                              String q = "select ${logicalName} from ${entityClass.name} as ${logicalName} where ${whereClause}"
+                              Query query = em.createQuery(q)
+
+                              params.each { String name, value -> query.setParameter(name, value)}
+                              query.setMaxResults(1)
+                              try {
+                                return query.singleResult
+                              } catch (javax.persistence.NoResultException e) {
+                                return null
+                              }
+                            } as JpaCallback)
+                          }
+
+                          // Foo.getAll(1,2,3)
+                          getAll { List identifiers ->
+                            jpaTemplate.execute({ EntityManager em ->
+                                def converted = identifiers.collect { it.toInteger() }
+                                String q = "select $logicalName from $entityClass.name as $logicalName where ${logicalName}.id in (${converted.join(',')})"
+                                Query query = em.createQuery(q)
+                                query.resultList
+                            } as JpaCallback )
+                          }
                         
                           // Foo.list(max:10)
                           plugin.doc "Returns a List of all entities"
@@ -154,11 +397,34 @@ public class JpaPluginSupport {
                                   q.resultList
                               } as JpaCallback)
                           }
+
+                          // Foo.lock(1)
+                          lock { Serializable id ->
+                            def obj = get(id)
+                            if(obj) {
+                               jpaTemplate.execute({ EntityManager em ->
+                                  em.lock obj, LockModeType.WRITE 
+                               } as JpaCallback)
+                            }
+                            return obj
+                          }
                           // Foo.withEntityManager { em -> }
                           plugin.doc "Allows direct access to the JPA EntityManager"
                           withEntityManager { Closure callable ->
-                              callable.call( jpaTemplate.getEntityManager() )
+                              jpaTemplate.execute({ EntityManager em ->
+                                   callable.call( em )
+                              } as JpaCallback)                           
                           }
+
+                          // Foo.withTransaction { status -> }
+                          plugin.doc "Initiates a programmatic Spring transaction"
+                          withTransaction { Closure callable ->
+                            if(!transactionManagerBean) throw new IllegalStateException("No transactionManager bean is defined! Register a JpaTransactionManager in your Spring configuration.")
+
+                            TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManagerBean)
+                            transactionTemplate.execute(callable as TransactionCallback)
+                          }
+
                       }
 
                       getConstraints {->
@@ -174,6 +440,27 @@ public class JpaPluginSupport {
                           }
                           return delegate
                         }
+                        else {
+                            JpaPluginSupport.rollbackCurrentTransaction(jpaTemplate)
+                            return null
+                        }
+                      }
+
+                      // foo.merge(flush:true)
+                      plugin.doc "Merges a detached entity or saves an new entity into the persistence context"                    
+                      merge { Map args = [:] ->
+                        if(delegate.validate()) {
+                          jpaTemplate.merge delegate
+                          if(args?.flush) {
+                             jpaTemplate.flush()
+                          }
+                          return delegate
+                        }
+                        else {
+                            JpaPluginSupport.rollbackCurrentTransaction(jpaTemplate)
+                            return null
+                        }
+
                       }
                       // foo.delete(flush:true)
                       plugin.doc "Deletes an entity"
@@ -187,6 +474,14 @@ public class JpaPluginSupport {
                       plugin.doc "Refreshes an entities state"
                       refresh {-> jpaTemplate.refresh delegate }
 
+                      // foo.lock()
+                      plugin.doc "Establishes a write lock"
+                      lock {->
+                        def object = delegate
+                        jpaTemplate.execute({ EntityManager em ->
+                          em.lock object, LockModeType.WRITE                         
+                        } as JpaCallback)
+                      }
 
                   }
 
@@ -198,4 +493,30 @@ public class JpaPluginSupport {
               throw new JpaPluginException("No ${EntityManagerFactory.name} configured, you need to configure one or install a JPA provider plugin.")
           }
   }
+
+  public static rollbackCurrentTransaction(JpaTemplate jpaTemplate) {
+    try {
+      // rollback the transaction on a validation error
+      def status = TransactionAspectSupport.currentTransactionStatus()
+      status.setRollbackOnly()
+    } catch (NoTransactionException e) {
+      // if there is no transaction set flush to manual
+      jpaTemplate.execute({EntityManager em ->
+        em.setFlushMode(FlushModeType.COMMIT)
+      } as JpaCallback)
+    }
+  }
+
+  private static int getArgCountForComparator(String comparator) {
+      if (comparator == "Between") {
+          return 2
+      }
+      else if (["IsNull", "IsNotNull"].contains(comparator)) {
+          return 0
+      }
+      else {
+          return 1
+      }
+  }
+
 }
