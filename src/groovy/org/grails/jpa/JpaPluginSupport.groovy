@@ -60,6 +60,9 @@ public class JpaPluginSupport {
           "NotEqual",
           "Like",
           "Ilike",
+          "InList",
+          "NotInList",
+          "NotBetween",
           "Between" ])
   static final COMPARATORS_RE = COMPARATORS.join("|")
   static final DYNAMIC_FINDER_RE = /(\w+?)(${COMPARATORS_RE})?((And|Or)(\w+?)(${COMPARATORS_RE})?)?/
@@ -144,12 +147,12 @@ public class JpaPluginSupport {
                             boolean singleResult = !m[0][1]
 
                             def first = fields[0]
-                            queryString << "(${first.field} = ?)"
+                            queryString << "(${logicalName}.${first.field} ${JpaPluginSupport.getJpaQLExpressionFor(first.comparator)})"
                             if(join) {
                                 if(join == "Or") queryString << " or "
                                 else queryString << " and "
                                 def second = fields[1]
-                                queryString << "(${second.field} = ?)"
+                                queryString << "(${logicalName}.${second.field} ${JpaPluginSupport.getJpaQLExpressionFor(second.comparator)})"
                             }
 
                             // cache new behavior
@@ -168,6 +171,7 @@ public class JpaPluginSupport {
                                    }
 
                                    localArgs.eachWithIndex {val, int i ->
+                                      if(val instanceof GString) val = val.toString()
                                       query.setParameter(i+1, val)
                                    }
 
@@ -274,6 +278,7 @@ public class JpaPluginSupport {
                             jpaTemplate.execute({ EntityManager em ->
                               Query q = em.createQuery(dml)
                               params.eachWithIndex { val, int i ->
+                                if(val instanceof GString) val = val.toString()
                                 q.setParameter(i+1, val)
                               }
                               q.executeUpdate()
@@ -284,6 +289,7 @@ public class JpaPluginSupport {
                             jpaTemplate.execute({ EntityManager em ->
                               Query q = em.createQuery(dml)
                               params.each {String name, val ->
+                                if(val instanceof GString) val = val.toString()
                                 q.setParameter(name, val)
                               }
                               q.executeUpdate()
@@ -315,6 +321,7 @@ public class JpaPluginSupport {
                               Query query = em.createQuery(q)
                               query.setMaxResults(1)
                               params.eachWithIndex { val, int i ->
+                                if(val instanceof GString) val = val.toString()
                                 query.setParameter(i+1, val)
                               }
                               try {
@@ -329,7 +336,10 @@ public class JpaPluginSupport {
                           find = { String q, Map params ->
                               jpaTemplate.execute({ EntityManager em ->
                                 Query query = em.createQuery(q)
-                                params.each { String name, value -> query.setParameter(name, value)}
+                                params.each { String name, value ->
+                                  if(value instanceof GString) value = value.toString()
+                                  query.setParameter(name, value)
+                                }
                                 query.setMaxResults(1)
                                 try {
                                   return query.singleResult
@@ -348,7 +358,10 @@ public class JpaPluginSupport {
                               String q = "select ${logicalName} from ${entityClass.name} as ${logicalName} where ${whereClause}"
                               Query query = em.createQuery(q)
 
-                              params.each { String name, value -> query.setParameter(name, value)}
+                              params.each { String name, value ->
+                                if(value instanceof GString) value = val.toString()
+                                query.setParameter(name, value)
+                              }
                               query.setMaxResults(1)
                               try {
                                 return query.singleResult
@@ -505,6 +518,26 @@ public class JpaPluginSupport {
         em.setFlushMode(FlushModeType.COMMIT)
       } as JpaCallback)
     }
+  }
+
+  public static getJpaQLExpressionFor(String comparator) {
+      // default to equals
+      def result = " = ? "
+      switch(comparator) {
+          case "IsNull": result = " is null "; break
+          case "IsNotNull": result = " is not null "; break
+          case "Like": result = " like ? "; break
+          case "Between": result = " between ? and ? "; break
+          case "NotBetween": result = " not between ? and ? "; break
+          case "InList": result = " in (?) "; break
+          case "NotInList": result = " not in (?) "; break
+          case "LessThan": result = " < ? "; break
+          case "LessThanEquals": result = " <= ? "; break
+          case "GreaterThan": result = " > ? "; break
+          case "GreaterThanEquals": result = " >= ? "; break
+          case "NotEqual": result = " != ? "; break        
+      }
+      return result
   }
 
   private static int getArgCountForComparator(String comparator) {

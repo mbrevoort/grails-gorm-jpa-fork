@@ -20,6 +20,19 @@ public class DynamicFindersTests extends GroovyTestCase{
 
   }
 
+  void testFinderWithGStringValue() {
+    def name = "Bob"
+    def person = Person.findByName("$name")
+
+    assertNotNull "should have returned a person", person
+
+    // call it again to exercise cached version
+    person = Person.findByName("$name")
+
+    assertNotNull "should have returned a person", person
+
+  }
+
   void testSimpleDynamicFinder() {
       def person = Person.findByName("Bob")
 
@@ -44,6 +57,36 @@ public class DynamicFindersTests extends GroovyTestCase{
 
 
       assertNull "should not have returned a result", Person.findByNameAndAge("Bob", 12)
+  }
+
+  void testFindWithLikeExpression() {
+      def person = Person.findByNameLike("Bo%")
+
+      assertNotNull "should have returned a person", person
+
+      // call it again to exercise cached version
+      person = Person.findByNameLike("Bo%")
+      assertNotNull "should have returned a person", person
+
+
+      assertNull "should not have returned a result", Person.findByNameLike("Ra%")
+
+  }
+
+  void testFindAllWithLikeExpression() {
+    def people = Person.findAllByNameLike("Fr%")
+
+    assertNotNull "should have returned a list", people
+    assertEquals 2, people.size()
+
+    // call it again to exercise cached version
+
+    people = Person.findAllByNameLike("Fr%")
+
+    assertNotNull "should have returned a list", people
+    assertEquals 2, people.size()
+
+    assertEquals "should have contained Frank", "Frank", people.find { it.name == "Frank" }?.name
   }
 
 
