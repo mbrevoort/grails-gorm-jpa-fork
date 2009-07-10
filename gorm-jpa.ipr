@@ -260,8 +260,12 @@
       <JAVADOC />
       <SOURCES>
         <root url="file:///Developer/appengine-java-sdk-1.2.1/src/orm/datanucleus-core-1.1.0/src/java" />
+        <root url="file://$SPRING_DIR$/src" />
       </SOURCES>
     </library>
   </component>
+  <UsedPathMacros>
+    <macro name="SPRING_DIR" />
+  </UsedPathMacros>
 </project>
 

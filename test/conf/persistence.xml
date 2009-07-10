@@ -4,7 +4,9 @@
    version="1.0">
    <persistence-unit name="manager">
       <provider>org.hibernate.ejb.HibernatePersistence</provider>
-      <class>org.acme.Person</class>       
+      <class>org.acme.Person</class>
+      <class>org.acme.Role</class>
+      <class>org.acme.Address</class>
       <properties>
          <property name="hibernate.dialect" value="org.hibernate.dialect.HSQLDialect"/>
          <property name="hibernate.hbm2ddl.auto" value="create-drop"/>

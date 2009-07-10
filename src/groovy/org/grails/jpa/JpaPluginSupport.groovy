@@ -62,8 +62,8 @@ public class JpaPluginSupport {
   
 
   static doWithSpring = {
-          xmlns context:"http://www.springframework.org/schema/context"
-          context.'component-scan'( type:"annotation", filter: Entity.name, 'scope-resolver':PrototypeScopeMetadataResolver.name )
+    xmlns context:"http://www.springframework.org/schema/context"
+    context.'component-scan'( type:"annotation", filter: Entity.name, 'scope-resolver':PrototypeScopeMetadataResolver.name )
   }
 
   static doWithApplicationContext = { ApplicationContext applicationContext ->

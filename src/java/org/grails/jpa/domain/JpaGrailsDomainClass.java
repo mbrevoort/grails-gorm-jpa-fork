@@ -24,14 +24,13 @@ import org.springframework.validation.Validator;
 import org.springframework.beans.BeanUtils;
 
 import javax.persistence.*;
-import java.util.Map;
-import java.util.Set;
-import java.util.HashMap;
-import java.util.Collections;
+import java.util.*;
 import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
+import java.lang.reflect.ParameterizedType;
 
 import grails.util.GrailsNameUtils;
 import groovy.lang.Closure;
@@ -242,7 +241,15 @@ public class JpaGrailsDomainClass extends AbstractGrailsClass implements GrailsD
         }
 
         public Class getReferencedPropertyType() {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
+            if(Collection.class.isAssignableFrom(getType())) {
+                final Type genericType = field.getGenericType();
+                if(genericType instanceof ParameterizedType) {
+                    final Type[] arguments = ((ParameterizedType) genericType).getActualTypeArguments();
+                    if(arguments.length>0)
+                        return (Class) arguments[0];
+                }                
+            }
+            return getType();
         }
 
         public GrailsDomainClassProperty getOtherSide() {

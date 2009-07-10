@@ -2,6 +2,7 @@ package org.grails.jpa.domain
 
 import org.codehaus.groovy.grails.exceptions.GrailsDomainException
 import org.acme.Person
+import org.acme.Role
 
 /**
  * @author Graeme Rocher
@@ -11,6 +12,12 @@ import org.acme.Person
  */
 
 public class JpaGrailsDomainClassTests extends GroovyTestCase{
+
+    void testGetReferencedType() {
+      def personDomain = new JpaGrailsDomainClass(Person)
+
+      assertEquals Role,personDomain.getPropertyByName("roles").referencedPropertyType
+    }
 
     void testCreateDomainClass() {        
         shouldFail(GrailsDomainException) {
