@@ -27,6 +27,12 @@ class Person {
     @Version
     Long version
 
+    @OneToMany
+    Set<Role> roles = new HashSet<Role>()
+
+    @OneToOne(optional = true)
+    Address address
+
     static constraints = {
         name blank:false
 
