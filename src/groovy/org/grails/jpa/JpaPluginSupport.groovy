@@ -23,7 +23,6 @@ import org.grails.jpa.domain.JpaGrailsDomainClass
 import org.grails.jpa.exceptions.JpaPluginException
 import org.grails.spring.scope.PrototypeScopeMetadataResolver
 import org.springframework.beans.SimpleTypeConverter
-import org.springframework.beans.factory.generic.GenericBeanFactoryAccessor
 import org.springframework.context.ApplicationContext
 import org.springframework.orm.jpa.JpaCallback
 import org.springframework.orm.jpa.JpaTemplate
@@ -67,9 +66,17 @@ public class JpaPluginSupport {
   }
 
   static doWithApplicationContext = { ApplicationContext applicationContext ->
-
-          def accessor = new GenericBeanFactoryAccessor(applicationContext)
-          def entityBeans = accessor.getBeansWithAnnotation(Entity)
+		  def grailsVersion = grails.util.GrailsUtil.grailsVersion
+		  def entityBeans = [:]
+		  // have to handle different Spring APIs differently
+		  if(grailsVersion?.startsWith("1.1")) {
+			  def accessorClass = Thread.currentThread().contextClassLoader.loadClass('org.springframework.beans.factory.generic.GenericBeanFactoryAccessor')
+	          def accessor = accessClass.newInstance(applicationContext)
+	          entityBeans = accessor.getBeansWithAnnotation(Entity)				
+		  }
+		  else {
+			  entityBeans = applicationContext.getBeansWithAnnotation(Entity)
+		  }
 
           def entityManagerFactoryBean = applicationContext.getBeansOfType(EntityManagerFactory)
           Map transactionManagerBeans = applicationContext.getBeansOfType(PlatformTransactionManager)
@@ -149,10 +156,10 @@ public class JpaPluginSupport {
                             else {
                               expr = JpaPluginSupport.getJpaQLExpressionFor(first.comparator)
                             }
-                            queryString << "(${logicalName}.${first.field} ${expr})"
+                            queryString.append( "(${logicalName}.${first.field} ${expr})" )
                             if(join) {
-                                if(join == "Or") queryString << " or "
-                                else queryString << " and "
+                                if(join == "Or") queryString.append( " or " )
+                                else queryString.append(" and ")
                                 def second = fields[1]
                                 if(appEngine) {
                                   (expr,state) = JpaPluginSupport.getJpaQLExpressionForAppEngine(second.comparator, state)
@@ -160,7 +167,7 @@ public class JpaPluginSupport {
                                 else {
                                   expr = JpaPluginSupport.getJpaQLExpressionFor(first.comparator)
                                 }
-                                queryString << "(${logicalName}.${second.field} ${expr})"
+                                queryString.append("(${logicalName}.${second.field} ${expr})")
                             }
 
                             queryString = queryString.toString()
@@ -520,20 +527,20 @@ public class JpaPluginSupport {
 
   public static getJpaQLExpressionForAppEngine(String comparator, int state) {
       // default to equals
-      def result = " = ?${++state} "
+      def result = " = ?${state++} "
       switch(comparator) {
           case "IsNull": result = " is null "; break
           case "IsNotNull": result = " is not null "; break
-          case "Like": result = " like ?${++state} "; break
-          case "Between": result = " between ?${++state} and ?${++state} "; break
-          case "NotBetween": result = " not between ?${++state} and ?${++state} "; break
-          case "InList": result = " in (?${++state}) "; break
-          case "NotInList": result = " not in (?${++state}) "; break
-          case "LessThan": result = " < ?${++state} "; break
-          case "LessThanEquals": result = " <= ?${++state} "; break
-          case "GreaterThan": result = " > ?${++state} "; break
-          case "GreaterThanEquals": result = " >= ?${++state} "; break
-          case "NotEqual": result = " != ?${++state} "; break
+          case "Like": result = " like ?${state++} "; break
+          case "Between": result = " between ?${state++} and ?${state++} "; break
+          case "NotBetween": result = " not between ?${state++} and ?${state++} "; break
+          case "InList": result = " in (?${state++}) "; break
+          case "NotInList": result = " not in (?${state++}) "; break
+          case "LessThan": result = " < ?${state++} "; break
+          case "LessThanEquals": result = " <= ?${state++} "; break
+          case "GreaterThan": result = " > ?${state++} "; break
+          case "GreaterThanEquals": result = " >= ?${state++} "; break
+          case "NotEqual": result = " != ?${state++} "; break
       }
       return [result, state]
   }

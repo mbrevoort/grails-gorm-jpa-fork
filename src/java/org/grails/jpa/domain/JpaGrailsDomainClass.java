@@ -300,6 +300,10 @@ public class JpaGrailsDomainClass extends AbstractGrailsClass implements GrailsD
             return isAnnotatedWith(OneToOne.class);
         }
 
+		public boolean isHasOne() {
+			return isAnnotatedWith(OneToOne.class);
+		}
+
         public GrailsDomainClass getReferencedDomainClass() {
             return null;  //To change body of implemented methods use File | Settings | File Templates.
         }
