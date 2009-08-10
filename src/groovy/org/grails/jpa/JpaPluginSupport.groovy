@@ -183,10 +183,14 @@ public class JpaPluginSupport {
                                    def queryParams
                                    if(localArgs && (localArgs[-1] instanceof Map)) {
                                       queryParams = localArgs[-1]
-                                      localArgs = localArgs[0..-2]
+									  if(localArgs.size()-1 != 0)
+                                      	 localArgs = localArgs[0..-2]
+									  else {
+										 localArgs = null
+									  }
                                    }
 
-                                   localArgs.eachWithIndex {val, int i ->
+                                   localArgs?.eachWithIndex {val, int i ->
                                       if(val instanceof GString) val = val.toString()
                                       query.setParameter(i+1, val)
                                    }
