@@ -22,7 +22,7 @@ import org.grails.jpa.domain.JpaDomainClassArtefactHandler
 import org.grails.jpa.domain.JpaGrailsDomainClass
 import org.grails.jpa.exceptions.JpaPluginException
 import org.grails.spring.scope.PrototypeScopeMetadataResolver
-import org.springframework.beans.SimpleTypeConverter
+import org.springframework.beans.*
 import org.springframework.context.ApplicationContext
 import org.springframework.orm.jpa.JpaCallback
 import org.springframework.orm.jpa.JpaTemplate
@@ -100,7 +100,8 @@ public class JpaPluginSupport {
                  app.addArtefact(JpaDomainClassArtefactHandler.TYPE, new JpaGrailsDomainClass(entityClass))                 
               }
 
-              for(domainClass in application.domainClasses) {
+              for(dc in application.domainClasses) {
+				  def domainClass = dc
                   if(!(domainClass instanceof JpaGrailsDomainClass)) continue;
 
                   JpaGrailsDomainClass jpaGrailsDomainClass = domainClass
@@ -109,6 +110,9 @@ public class JpaPluginSupport {
 
 				  def plugin = delegate
                   def typeConverter = new SimpleTypeConverter()
+				  applicationContext.getBeansOfType(PropertyEditorRegistrar).each { key, val ->
+						val.registerCustomEditors typeConverter
+				  }
                   // dynamic finder handling with methodMissing
                   entityClass.metaClass.static.methodMissing = { method, args ->
                     def m = method =~ /^find(All)?By${DYNAMIC_FINDER_RE}$/
