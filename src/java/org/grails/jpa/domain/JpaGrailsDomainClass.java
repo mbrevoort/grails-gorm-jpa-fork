@@ -15,9 +15,8 @@
 package org.grails.jpa.domain;
 
 import org.codehaus.groovy.grails.commons.AbstractGrailsClass;
-import org.codehaus.groovy.grails.commons.GrailsDomainClass;
-import org.codehaus.groovy.grails.commons.GrailsDomainClassProperty;
-import org.codehaus.groovy.grails.commons.GrailsClassUtils;
+import org.codehaus.groovy.grails.commons.*;
+import org.codehaus.groovy.grails.plugins.*;
 import org.codehaus.groovy.grails.exceptions.GrailsDomainException;
 import org.codehaus.groovy.grails.validation.metaclass.ConstraintsEvaluatingDynamicProperty;
 import org.springframework.validation.Validator;
@@ -25,6 +24,7 @@ import org.springframework.beans.BeanUtils;
 
 import javax.persistence.*;
 import java.util.*;
+import grails.util.*;
 import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -67,8 +67,18 @@ public class JpaGrailsDomainClass extends AbstractGrailsClass implements GrailsD
     }
 
     private void evaluateConstraints() {
-        ConstraintsEvaluatingDynamicProperty constraintsEvaluator = new ConstraintsEvaluatingDynamicProperty(getProperties());
-        this.constrainedProperties = (Map) constraintsEvaluator.get(getReference().getWrappedInstance());
+		try {
+			if(GrailsPluginUtils.isValidVersion(GrailsUtil.getGrailsVersion(), "1.2 > *")) {
+				this.constrainedProperties = GrailsDomainConfigurationUtil.evaluateConstraints(getReference().getWrappedInstance(), getProperties());
+			}
+			else {
+		        ConstraintsEvaluatingDynamicProperty constraintsEvaluator = new ConstraintsEvaluatingDynamicProperty(getProperties());
+		        this.constrainedProperties = (Map) constraintsEvaluator.get(getReference().getWrappedInstance());			
+			}			
+		}
+		catch(Exception e) {
+			throw new GrailsDomainException("Constrainted of class ["+getClazz().getName()+"] caused error: " + e.getMessage(),e);
+		}
     }
 
     private void evaluateClassProperties(PropertyDescriptor[] descriptors) {
