@@ -69,14 +69,16 @@ public class JpaPluginSupport {
 		  def grailsVersion = grails.util.GrailsUtil.grailsVersion
 		  def entityBeans = [:]
 		  // have to handle different Spring APIs differently
+		  def accessorClass
 		  if(grailsVersion?.startsWith("1.1")) {
-			  def accessorClass = Thread.currentThread().contextClassLoader.loadClass('org.springframework.beans.factory.generic.GenericBeanFactoryAccessor')
-	          def accessor = accessorClass.newInstance(applicationContext)
-	          entityBeans = accessor.getBeansWithAnnotation(Entity)				
+			  accessorClass = Thread.currentThread().contextClassLoader.loadClass('org.springframework.beans.factory.generic.GenericBeanFactoryAccessor')
 		  }
 		  else {
-			  entityBeans = applicationContext.getBeansWithAnnotation(Entity)
+			  accessorClass = Thread.currentThread().contextClassLoader.loadClass('org.codehaus.groovy.grails.beans.factory.GenericBeanFactoryAccessor')
 		  }
+          def accessor = accessorClass.newInstance(applicationContext)
+          entityBeans = accessor.getBeansWithAnnotation(Entity)				
+		
 
           def entityManagerFactoryBean = applicationContext.getBeansOfType(EntityManagerFactory)
           Map transactionManagerBeans = applicationContext.getBeansOfType(PlatformTransactionManager)
