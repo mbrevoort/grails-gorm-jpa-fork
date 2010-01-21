@@ -19,7 +19,7 @@ grails.project.dependency.resolution = {
         compile 'org.hibernate:hibernate-entitymanager:3.4.0.GA', [export: false]
 				
 				
-		runtime 'javassist:javassist:3.4.GA', [export: false]
+		runtime 'javassist:javassist:3.8.0.GA', [export: false]
 		runtime 'antlr:antlr:2.7.6', [export: false]		
 		runtime( 'dom4j:dom4j:1.6.1' , [export: false]) {
 			excludes 'xml-apis'
