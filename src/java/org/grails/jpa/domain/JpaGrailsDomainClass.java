@@ -216,6 +216,9 @@ public class JpaGrailsDomainClass extends AbstractGrailsClass implements GrailsD
         private boolean persistent;
         private Field field;
         private boolean version;
+		private boolean derived;
+		
+		
 
         public JpaDomainClassProperty(GrailsDomainClass domain, PropertyDescriptor descriptor) {
             this.ownerClass = domain.getClazz();
@@ -337,6 +340,14 @@ public class JpaGrailsDomainClass extends AbstractGrailsClass implements GrailsD
         public void setOtherSide(GrailsDomainClassProperty referencedProperty) {
             //To change body of implemented methods use File | Settings | File Templates.
         }
+
+		public boolean isDerived() {
+			return this.derived;
+		}
+		
+		public void setDerived(boolean b) {
+			this.derived = b;
+		}
 
         public boolean isInherited() {
             return false;  //To change body of implemented methods use File | Settings | File Templates.
